@@ -1,0 +1,79 @@
+# Query Syntax Guide
+
+## Phrase Search & Format
+- make sure all search terms that are more than one word needs to be in quotations
+- *Example:*
+    - "climate change"
+## Single Character Wildcard
+- Match terms where a single character in  a specific position can vary
+- *Example:*
+    - "wom?n" works to match things like "women" or "woman"
+
+## Multiple Character Wildcard
+- Matches terms where any number of characters can replace the '*'
+- *Example:*
+    - `wom*n` or `wom*` works to match things like `women` or `woman`.
+
+## Word Stems
+- Match multiple conjugations
+- *Example:*
+    - "learn*" will match "learn", "learner", "learning", etc. 
+
+## Hyphens
+- Words with hyphens must be in double quotes to ensure that the hyphenated phrase is treated as one search term
+- *Example:*
+    - "two-spirit" needs to be in double quotes
+
+## AND/OR Capitalization
+- Boolean operators like AND and OR need to be capitalized
+- group ORs and ANDS
+- *Example:*
+    - (church OR faith) AND (lesbian OR gay or LGBTQ)
+
+## Search Titles Only
+- search a specific column using this format "column: search term"
+- *Example:*
+    - specify the column by searching something like "article_title: biden"
+    - for the wayback machine, specify the column by searching somethign like "title: biden"
+
+## Searching for an Exact Phrase
+-  Searches for an exact match of the phrase
+- *Example:*
+    - use double quotes to match an exact phrase like "unhoused person"
+
+## Regular Expressions
+- not supported in Media Cloud or Wayback Machine
+
+## "Fuzzy" Queries
+- The tilde after a word will match terms that are close in spelling.
+- Not supported in Wayback Machine
+- *Example:*
+    - query for "Biden~" to match any slight mispellings of his name ("Bidan", "Bidden", etc)
+## Proximity Search
+- The tilde with a number after it allows you to find words that appear within a certain number of words from each other
+- *Example:*
+    - "woman killed"~10 will return results where the words "woman" and "killed" are within 10 words of each other
+
+## Default Search
+- No boolean operator is an assumed AND
+- *Example:*
+    - "monkey banana" == "monkey AND banana"
+
+## Negation
+- using NOT or - excludes results that contain that term
+- *Example:*
+    - "gaza NOT hamas" will return results about "Gaza" but exclude any result mentioning "Hamas"
+
+## Language Filter
+-  a "language:code (ISO 639-1)" clause filters results based on the language of the content
+- *Example:*
+    - "Biden language:en" will return results in English, while "Biden language:es" will return results in Spanish
+
+# Structuring Queries Advice
+
+- *Prompt*: I am looking for stories regarding Biden's policies on climate change
+    - *Query*: Biden AND policy AND "climate change"
+    - *Reasoning*: "Biden" and "policy" does not need quotes in the query because they are one word. AND is capitalized.
+- *Prompt*: I am looking for black woman killed by the police.
+    - *Query*: ((murder* OR homicide* OR femicide OR feminicide OR murdered OR dead OR death* OR killed OR murdered OR shot OR stabbed OR struck OR strangled OR "life-less") AND (police* OR officer* OR custody) AND NOT (covid* OR vaccin*) AND (`wom*n` OR `girl*` OR transgender OR trans OR nonbinary OR non-binary OR sayhername OR blm OR blacklivesmatter OR "black lives matter"))
+    - *Reasoning*: First clause is identifying the crime.The second clause identifies the perpatrator. The third clause excludes covid terms because black lives matter occurred at the same time as black lives matter. The last clause identifies the victim. 
