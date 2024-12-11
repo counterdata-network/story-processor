@@ -148,6 +148,7 @@ def _process_project_task(args: Dict) -> Dict:
                 s["indexed_date"] = s["indexed_date"]
                 s["project_id"] = project["id"]
                 s["story_text"] = s["text"]
+                s["url"] = s["url"].rstrip("/")
             page_count += 1
             # and log that we got and queued them all
             Session = database.get_session_maker()
