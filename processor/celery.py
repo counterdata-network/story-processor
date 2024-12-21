@@ -22,3 +22,9 @@ app = Celery(
 )
 
 app.conf.timezone = "UTC"
+
+# tweaks to try and fix problem related to losing connection to broker (RabbitMQ on production)
+app.conf.broker_heartbeat = 60
+app.conf.broker_pool_limit = 10  # based on some google-ing
+app.conf.broker_connection_timeout = 60  # Increase timeout
+app.conf.worker_prefetch_multiplier = 1  # Reduce prefetch for better load balancing
