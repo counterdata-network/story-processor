@@ -21,3 +21,5 @@ mc-providers==2.0.*
 numpy==1.26.* # freeze this here for tensorflow compatibility
 requests
 requests_ratelimiter==0.7.*
+redis==5.2.*
+kombu
