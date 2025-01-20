@@ -267,17 +267,6 @@ def get_model_list() -> List[Dict]:
         return json.load(f)
 
 
-def _read_json(filepath):
-    """Read a JSON file."""
-    if os.path.exists(filepath):
-        with open(filepath, "r") as f:
-            try:
-                return json.load(f)
-            except json.JSONDecodeError as e:
-                logger.warning(f"Failed to load JSON from {filepath}: {e}")
-    return {}
-
-
 def update_model_list():
     """
     Fetch and save list of models from the central server.
@@ -286,7 +275,7 @@ def update_model_list():
     if len(model_list) == 0:
         raise RuntimeError("Fetched empty model list was empty - bailing unhappily")
 
-    existing_models = _read_json(os.path.join(CONFIG_DIR, "language-models.json"))
+    existing_models = get_model_list()
     updated_models = []
 
     # update only if the version number has changed, or if the model is new
