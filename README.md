@@ -42,16 +42,17 @@ Verified on M2 and M3:
 1. install brew
 2. install miniforge (with brew)
 3. installed wget (with brew)
-4. Installed tensorflow 2.10.0: `python -m pip install tensorflow-macos==2.10.0` (from [Apple's docs](https://developer.apple.com/metal/tensorflow-plugin/)). 
-5. Download tensorflow-text: [`tensorflow_text-2.10.0-cp310-cp310-macosx_11_0_arm64.whl`](https://github.com/sun1638650145/Libraries-and-Extensions-for-TensorFlow-for-Apple-Silicon/releases/download/v2.10/tensorflow_text-2.10.0-cp310-cp310-macosx_11_0_arm64.whl)
+4. install lxml: `brew install libxml2 libxmlsec1 pkg-config; export LDFLAGS="-L/opt/homebrew/opt/libxml2/lib; export CPPFLAGS="-I/opt/homebrew/opt/libxml2/include"; pip install lxml"` 
+5. Installed tensorflow 2.10.0: `python -m pip install tensorflow-macos==2.10.0` (from [Apple's docs](https://developer.apple.com/metal/tensorflow-plugin/)). 
+6. Download tensorflow-text: [`tensorflow_text-2.10.0-cp310-cp310-macosx_11_0_arm64.whl`](https://github.com/sun1638650145/Libraries-and-Extensions-for-TensorFlow-for-Apple-Silicon/releases/download/v2.10/tensorflow_text-2.10.0-cp310-cp310-macosx_11_0_arm64.whl)
 from the helpful repo of [prebuilt tensorflow wheels for Apple Silicon](https://github.com/sun1638650145/Libraries-and-Extensions-for-TensorFlow-for-Apple-Silicon/releases/). 
-6. Install that via `python -m pip install [filename]`
-7. Comment out all the tensorflow packages in requirements.txt
-8. Install the reqs via `python -m pip install -r requirements.txt`
-9. Install the dev reqs via `python -m pip install -r requirements-dev.txt`
-10. Set up your env vars are indicated above
-11. Run scripts/download-models.sh to install the latest models
-12. Run `pytest` to verify everything is working
+7. Install that via `python -m pip install [filename]`
+8. Comment out all the tensorflow packages in requirements.txt
+9. Install the reqs via `python -m pip install -r requirements.txt`
+10. Install the dev reqs via `python -m pip install -r requirements-dev.txt`
+11. Set up your env vars are indicated above (maybe include `CUDA_VISIBLE_DEVICES=-1` if no GPUs)
+12. Run scripts/download-models.sh to install the latest models
+13. Run `pytest` to verify everything is working
  
  
 Running
