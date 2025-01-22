@@ -30,13 +30,13 @@ You want results that include murder-related terms and genetic genealogy, but al
 (murder OR homicide OR femicide OR feminicide) AND (woman OR girl OR Indigenous) AND genetic genealogy
 ```
 
-You want to match any variety of ways the incident is covered: murder OR homicide OR femicide OR feminicide
+You want to match any variety of ways the incident is covered: `murder OR homicide OR femicide OR feminicide`
 
-And you want to match different ways the victim or survivor is identified: woman OR girl OR Indigenous
+And you want to match different ways the victim or survivor is identified: `woman OR girl OR Indigenous`
 
 ### 3. Group Terms with Parentheses
 
-Parentheses help group terms and clarify the order of operations in complex queries.
+Parentheses help group terms and clarify the order of operations in complex queries. In queries, parentheses override the default order of operations, meaning that any expression within parentheses will be evaluated first, before any other operations outside of the parentheses are performed.
 
 **Example:**
 You want to search for various violent acts alongside gender identities. Group the terms to maintain clarity:
@@ -54,18 +54,20 @@ You want results with the specific phrase "genetic genealogy":
 ```
 "genetic genealogy"
 ```
+If the quotations were not present, the system would interpet it as `genetic AND geneaology`.
 
 ### 5. Include Wildcards
 
-Use wildcards (*) to capture variations of a word. The * wildcard represents any number of characters.
+Use wildcards (`*`) to capture variations of a word. The `*` wildcard represents any number of characters.
 
 **Example:**
-Searching for variations of woman and girl, such as plural cases, you can use wom\*n or girl* to include results like women or girls:
+Searching for variations of woman and girl, such as plural cases, you can use `wom\*n` or `girl*` to include results like "women" or "girls":
 
 ```
 (wom*n OR girl*)
 ```
-Note: But be careful, because wom\* can also match wombat
+Note: But be careful, because `wom\*` can also match "wombat".
+
 ### 6. Combine and Refine
 
 Now, combine all elements to create a more targeted query that captures all relevant terms and excludes irrelevant information.
@@ -91,34 +93,30 @@ Now, combine all elements to create a more targeted query that captures all rele
 ### 3. **Default Search**
 - When no Boolean operator is used, the default assumption is AND.
 - **Example:**
-    - `"monkey banana"` is equivalent to `"monkey AND banana"`
+    - `monkey banana` is equivalent to `monkey AND banana`
 
 ### 4. **Negation**
-- Use `NOT` or `-` to exclude terms from your search.
+- Use `NOT` or `-` to exclude terms from your search
 - **Example:**
-    - `"Gaza NOT Hamas"` will return results about Gaza but exclude any result mentioning Hamas.
-
-### 5. **Word Stems**
+    - `Gaza NOT Hamas` will return results about Gaza but exclude any result mentioning Hamas.
+      
+### 5. **Word Stems** / **Multiple Character Wildcard**
 - Match multiple conjugations or variations of a word by using a wildcard (`*`) after the root word.
-- **Example:**
+- **Examples:**
     - `"learn*"` will match "learn", "learner", "learning", etc.
-
-### 6. **Multiple Character Wildcard**
-- Matches terms where any number of characters can replace the `*`.
-- **Example:**
     - `wom*n` or `wom*` works to match things like `women` or `woman`.
 
-### 7. **Single Character Wildcard**
+### 6. **Single Character Wildcard**
 - Match terms where a single character can vary in a specific position using `?`.
 - **Example:**
     - `"wom?n"` works to match "woman" or "women".
 
-### 8. **Proximity Search**
+### 7. **Proximity Search**
 - Use a tilde with a number after it to find words that appear within a certain number of words from each other.
 - **Example:**
     - `"woman killed"~10` will return results where "woman" and "killed" are within 10 words of each other.
 
-### 9. **Fuzzy Queries**
+### 8. **Fuzzy Queries**
 - The tilde (`~`) after a word allows for slight misspellings or variations.
 - **Example:**
     - `"Biden~"` will match any slight misspellings like "Bidan" or "Bidden".
@@ -127,16 +125,16 @@ Now, combine all elements to create a more targeted query that captures all rele
 - Our system automatically searches body texts and article titles
 - We do not have the functionality to specify searching titles only
 
-### 11. **Hyphens**
+### 10. **Hyphens**
 - Wrap hyphenated phrases in double quotes to ensure the entire phrase is treated as one unit.
 - **Example:**
     - `"two-spirit"` needs to be in double quotes.
 
-### 12. **Language Filter**
+### 11. **Language Filter**
 - Filter results based on language using `"language:code (ISO 639-1)"`.
 - **Example:**
-    - `"Biden language:en"` returns results in English, while `"Biden language:es"` returns results in Spanish.
-- Navigate to [this link](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes) to find a list of language codes.
+    - `Biden AND language:en` returns results in English, while `Biden AND language:es` returns results in Spanish.
+Wikipedia has a [reference list of language codes](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes).
 
 ### 13. **Regular Expressions**
 - Regular expressions are not supported in most search engines like Media Cloud or Wayback Machine.
@@ -168,12 +166,13 @@ This query is designed to find reports involving violent deaths or unnatural dea
 ((murder* OR homicide* OR femicide OR feminicide OR murdered OR dead OR death* OR 
 killed OR murdered OR shot OR stabbed OR struck OR strangled OR "life-less") 
 AND 
-(wom*n OR girl* OR transgender OR trans OR nonbinary OR non-binary OR 
+(wom*n OR girl* OR transgender OR trans OR nonbinary OR "non-binary" OR 
 "African American" OR "African-American" OR "African descent" OR Black OR 
-Indigenous OR "Native American" OR two-spirit OR "two-spirit" OR prostitute OR 
+Indigenous OR "Native American" OR "two-spirit" OR "two spirit" OR prostitute OR 
 "sex worker"))
 ```
 **Groupings:**
-- First group uses wildcards on key terms (death*, murder*) to capture variations of violent death descriptions such as death/deaths and murder/murders- Second group combines gender identity terms with racial identity terms, including multiple formats for Black and Indigenous identities
+- First group uses wildcards on key terms (`death*`, `murder*`) to capture variations of violent death descriptions such as death/deaths and murder/murders
+- Second group combines gender identity terms with racial identity terms, including multiple formats for Black and Indigenous identities
 - Terms capture both formal (African American) and commonly used (Black) racial identity descriptors
-- Includes specific cultural identity terms like "two-spirit" that intersect with both gender and Indigenous identity
+- Includes specific cultural identity terms like `two-spirit` that intersect with both gender and Indigenous identity
