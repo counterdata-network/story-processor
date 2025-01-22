@@ -27,12 +27,12 @@ Boolean operators (AND, OR, NOT) allow you to refine your search by combining or
 You want results that include murder-related terms and genetic genealogy, but also include variations on gender and identity:
 
 ```
-(murder OR homicide OR femicide OR feminicide) AND (woman OR girl) AND Indigenous AND genetic genealogy
+(murder OR homicide OR femicide OR feminicide) AND (woman OR girl OR Indigenous) AND genetic genealogy
 ```
 
-You want to match any variety of ways the incident is covered: murder OR homicide OR femicide OR feminicide
+You want to match any variety of ways the incident is covered: `murder OR homicide OR femicide OR feminicide`
 
-And you want to match different ways the victim or survivor is identified: woman OR girl AND Indigenous
+And you want to match different ways the victim or survivor is identified: `woman OR girl OR Indigenous`
 
 ### 3. Group Terms with Parentheses
 
@@ -42,7 +42,7 @@ Parentheses help group terms and clarify the order of operations in complex quer
 You want to search for various violent acts alongside gender identities. Group the terms to maintain clarity:
 
 ```
-(murder OR homicide OR femicide) AND (woman OR girl) AND Indigenous
+(murder OR homicide OR femicide) AND (woman OR girl OR Indigenous)
 ```
 ### 4. Add Phrase Searches
 
@@ -54,19 +54,19 @@ You want results with the specific phrase "genetic genealogy":
 ```
 "genetic genealogy"
 ```
-If the quotations were not present, the system would interpet it as genetic AND geneaology.
+If the quotations were not present, the system would interpet it as `genetic AND geneaology`.
 
 ### 5. Include Wildcards
 
 Use wildcards (`*`) to capture variations of a word. The `*` wildcard represents any number of characters.
 
 **Example:**
-Searching for variations of woman and girl, such as plural cases, you can use `wom\*n` or `girl*` to include results like women or girls:
+Searching for variations of woman and girl, such as plural cases, you can use `wom\*n` or `girl*` to include results like "women" or "girls":
 
 ```
 (wom*n OR girl*)
 ```
-Note: But be careful, because `wom\*` can also match `wombat`
+Note: But be careful, because `wom\*` can also match "wombat".
 
 ### 6. Combine and Refine
 
