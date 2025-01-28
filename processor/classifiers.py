@@ -267,18 +267,22 @@ def get_model_list() -> List[Dict]:
         return json.load(f)
 
 
-def update_model_list():
+def update_model_list() -> List[Dict]:
     """
     Fetch and save list of models from the central server.
+    :return: list of models that are new, or have new versions, so they can be downloaded
     """
+    # load the (potentially) updated list of models from the central server
     model_list = apiclient.get_language_models_list()
     if len(model_list) == 0:
         raise RuntimeError("Fetched empty model list was empty - bailing unhappily")
+    logger.info(f"Loaded list of {len(model_list)} models from main server.")
 
+    # preload the existing list of models that are cached locally
     existing_models = get_model_list()
-    updated_models = []
 
     # update only if the version number has changed, or if the model is new
+    updated_models = []
     for model in model_list:
         existing_model = next(
             (m for m in existing_models if m["id"] == model["id"]), None
@@ -286,10 +290,10 @@ def update_model_list():
         if not existing_model or existing_model.get("version") != model.get("version"):
             updated_models.append(model)
 
-    # save model information and send updated model list for download
+    # save new model information and send updated model list for download
     with open(os.path.join(CONFIG_DIR, "language-models.json"), "w") as f:
         json.dump(model_list, f)
-    logger.info(f"{len(updated_models)} model(s) to update.")
+    logger.debug(f"{len(updated_models)} model(s) to update.")
     return updated_models
 
 
@@ -303,7 +307,7 @@ def download_models() -> bool:
         if not models_to_update:
             logger.info("No models to update. All versions are up-to-date.")
             return True
-        logger.info("Downloading models:")
+        logger.info(f"Downloading {len(models_to_update)} new or updated models:")
         for m in models_to_update:
             logger.info("  {} - {}".format(m["id"], m["name"]))
             for u in m["model_1_files"]:
