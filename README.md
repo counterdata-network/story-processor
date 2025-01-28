@@ -72,7 +72,7 @@ Developer Tools
 
 ### Tips
 
-* To empty out your local queue while developing, visit `http://localhost:15672/` the and click "delete/purge"
+* To empty out your local queue while developing, visit `http://localhost:15672/` then and click "delete/purge"
 on the Queues tab.
 
 Deploying
