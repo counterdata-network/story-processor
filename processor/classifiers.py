@@ -267,16 +267,34 @@ def get_model_list() -> List[Dict]:
         return json.load(f)
 
 
-def update_model_list():
+def update_model_list() -> List[Dict]:
     """
     Fetch and save list of models from the central server.
+    :return: list of models that are new, or have new versions, so they can be downloaded
     """
+    # load the (potentially) updated list of models from the central server
     model_list = apiclient.get_language_models_list()
     if len(model_list) == 0:
         raise RuntimeError("Fetched empty model list was empty - bailing unhappily")
+    logger.info(f"Loaded list of {len(model_list)} models from main server.")
+
+    # preload the existing list of models that are cached locally
+    existing_models = get_model_list()
+
+    # update only if the version number has changed, or if the model is new
+    updated_models = []
+    for model in model_list:
+        existing_model = next(
+            (m for m in existing_models if m["id"] == model["id"]), None
+        )
+        if not existing_model or existing_model.get("version") != model.get("version"):
+            updated_models.append(model)
+
+    # save new model information and send updated model list for download
     with open(os.path.join(CONFIG_DIR, "language-models.json"), "w") as f:
         json.dump(model_list, f)
-    return model_list
+    logger.debug(f"{len(updated_models)} model(s) to update.")
+    return updated_models
 
 
 def download_models() -> bool:
@@ -285,9 +303,12 @@ def download_models() -> bool:
     Returns success or failure bool - if False you probably want to suspend what you were doing and bail out
     """
     try:
-        model_list = update_model_list()
-        logger.info("Downloading models:")
-        for m in model_list:
+        models_to_update = update_model_list()
+        if not models_to_update:
+            logger.info("No models to update. All versions are up-to-date.")
+            return True
+        logger.info(f"Downloading {len(models_to_update)} new or updated models:")
+        for m in models_to_update:
             logger.info("  {} - {}".format(m["id"], m["name"]))
             for u in m["model_1_files"]:
                 _download_file(u, MODEL_DIR, m["filename_prefix"] + "_1")
@@ -295,8 +316,8 @@ def download_models() -> bool:
                 _download_file(u, MODEL_DIR, m["filename_prefix"] + "_2")
         return True
     except Exception as e:
-        logger.error(f"Couldn't get the models - bailing out cowardly {e}")
-    return False
+        logger.error(f"Couldn't get the models - bailing out cowardly. Error: {e}")
+        return False
 
 
 def _download_file(url: str, dest_dir: str, prefix: str):
