@@ -47,7 +47,7 @@ def load_projects_task() -> List[Dict]:
         force_reload=True, overwrite_last_story=False
     )
     logger.info("  Checking {} projects".format(len(project_list)))
-    # return [p for p in project_list if p['id'] == 177]
+    # return [p for p in project_list if p["id"] == 177]
     return project_list
 
 
@@ -141,6 +141,19 @@ def _process_project_task(args: Dict) -> Dict:
             continue  # fail gracefully by going to the next project; maybe next cron run it'll work?
         if len(page_of_stories) > 0:
             page_latest_indexed_date = max([s["indexed_date"] for s in page_of_stories])
+
+            # Make sure we are offset-naive for compatibility
+            try:
+                if page_latest_indexed_date.tzinfo is not None:
+                    page_latest_indexed_date = page_latest_indexed_date.replace(
+                        tzinfo=None
+                    )
+                if latest_indexed_date.tzinfo is not None:
+                    latest_indexed_date = latest_indexed_date.replace(tzinfo=None)
+            except AttributeError as e:
+                logger.error(f"Cannot process indexed dates: {e}")
+                raise
+
             latest_indexed_date = max(latest_indexed_date, page_latest_indexed_date)
             for s in page_of_stories:
                 s["source"] = processor.SOURCE_MEDIA_CLOUD
