@@ -3,11 +3,17 @@ Change Log
 
 Here is a history of what was changed in each version. 
 
+### v4.6.8
+
+* ensure date comparison on MC fetch is safely done (vis-a-vis timezones)
+
 ### v4.6.7
+
 * documentation updates
 * broker connection tweaks for stability improvement on connection to queue (now using Redis in production, no longer RabbitMQ)
 
 ### v4.6.6
+
 * remove trailing slash from URLs to help with deduplication
 * bump python runtime version
 
