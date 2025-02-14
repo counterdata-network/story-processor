@@ -141,6 +141,11 @@ def _process_project_task(args: Dict) -> Dict:
             continue  # fail gracefully by going to the next project; maybe next cron run it'll work?
         if len(page_of_stories) > 0:
             page_latest_indexed_date = max([s["indexed_date"] for s in page_of_stories])
+
+            # Make sure we are offset-naive for compatibility
+            page_latest_indexed_date = page_latest_indexed_date.replace(tzinfo=None)
+            latest_indexed_date = latest_indexed_date.replace(tzinfo=None)
+
             latest_indexed_date = max(latest_indexed_date, page_latest_indexed_date)
             for s in page_of_stories:
                 s["source"] = processor.SOURCE_MEDIA_CLOUD
