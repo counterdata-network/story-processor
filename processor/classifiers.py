@@ -329,6 +329,7 @@ def download_models() -> bool:
         if not models_to_update:
             logger.info("No models to update. All versions are up-to-date.")
             return True
+        logger.info(f"Downloading {len(models_to_update)} new or updated models:")
         for m in models_to_update:
             logger.info("  {} - {}".format(m["id"], m["name"]))
             for u in m["model_1_files"]:
