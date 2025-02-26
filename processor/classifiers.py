@@ -270,7 +270,7 @@ def get_model_list() -> List[Dict]:
 def update_model_list() -> List[Dict]:
     """
     Fetch and save list of models from the central server.
-    :return: list of models that are new, or have new versions, so they can be downloaded
+    :return: List of models that are new, or have new versions, so they can be downloaded
     """
     # load the (potentially) updated list of models from the central server
     model_list = apiclient.get_language_models_list()
@@ -290,10 +290,32 @@ def update_model_list() -> List[Dict]:
         if not existing_model or existing_model.get("version") != model.get("version"):
             updated_models.append(model)
 
+    # before returning, make sure that the model files that we've assumed exist, actually exist
+    for model in [m for m in model_list if m not in updated_models]:
+        # get extra safe .p name
+        for u in model["model_1_files"]:
+            model_file1 = _model_file_path(
+                u, MODEL_DIR, model["filename_prefix"] + "_1"
+            )
+            # if model 1 files don't exist, add the model to be updated, and skip the check for model 2 files
+            if not os.path.isfile(model_file1):
+                updated_models.append(model)
+                break
+        else:
+            for u in model["model_2_files"]:
+                # get extra safe .p name and check that it exists
+                model_file2 = _model_file_path(
+                    u, MODEL_DIR, model["filename_prefix"] + "_2"
+                )
+                if not os.path.isfile(model_file2):
+                    updated_models.append(model)
+                    break
+
     # save new model information and send updated model list for download
     with open(os.path.join(CONFIG_DIR, "language-models.json"), "w") as f:
         json.dump(model_list, f)
     logger.debug(f"{len(updated_models)} model(s) to update.")
+
     return updated_models
 
 
@@ -307,7 +329,6 @@ def download_models() -> bool:
         if not models_to_update:
             logger.info("No models to update. All versions are up-to-date.")
             return True
-        logger.info(f"Downloading {len(models_to_update)} new or updated models:")
         for m in models_to_update:
             logger.info("  {} - {}".format(m["id"], m["name"]))
             for u in m["model_1_files"]:
@@ -320,6 +341,17 @@ def download_models() -> bool:
         return False
 
 
+def _model_file_path(url: str, dest_dir: str, prefix: str) -> str:
+    """Generate a safe filename with the given prefix"""
+    url_parts = urlparse(url)
+    local_filename = url_parts.path.split("/")[-1]
+    filename_parts = local_filename.split("_")
+    extra_safe_filename = prefix + "_" + filename_parts[-1]
+    file_path = os.path.join(dest_dir, extra_safe_filename)
+
+    return file_path
+
+
 def _download_file(url: str, dest_dir: str, prefix: str):
     """
     This expects the files to either end with "_model.p" or "_vectorizer.p". It renames them here so that
@@ -330,10 +362,7 @@ def _download_file(url: str, dest_dir: str, prefix: str):
     :return:
     """
     # https://stackoverflow.com/questions/16694907/download-large-file-in-python-with-requests
-    url_parts = urlparse(url)
-    local_filename = url_parts.path.split("/")[-1]
-    filename_parts = local_filename.split("_")
-    extra_safe_filename = prefix + "_" + filename_parts[-1]
+    extra_safe_filename = _model_file_path(url, dest_dir, prefix)
     logger.info("    to {}".format(extra_safe_filename))
     with requests.get(url, stream=True) as r:
         with open(os.path.join(dest_dir, extra_safe_filename), "wb") as f:
