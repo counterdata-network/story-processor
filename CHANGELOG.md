@@ -3,6 +3,10 @@ Change Log
 
 Here is a history of what was changed in each version. 
 
+### v4.7.0
+
+* only download language models if they have changed or aren't already downloaded
+
 ### v4.6.8
 
 * ensure date comparison on MC fetch is safely done (vis-a-vis timezones)
