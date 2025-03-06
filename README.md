@@ -27,7 +27,7 @@ Install for Development
 - Create a database called "mc-story-processor" in Postgres, then run `alembic upgrade head`
 - `cp .env.template .env` and fill in the appropriate info for each setting in that file 
 - Run `pytest` on the command line to run all the automated tests and verify your setup is working
-- Required serivces:
+- Required servcies:
   - Mac 
     - Install rabbitmq: on MacOS do `brew install rabbitmq`
     - Install postgres: on MacOS do `brew install postgresql`
