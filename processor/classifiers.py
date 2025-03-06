@@ -263,8 +263,14 @@ def get_model_list() -> List[Dict]:
     Get the locally cached list of models
     :return:
     """
-    with open(os.path.join(CONFIG_DIR, "language-models.json"), "r") as f:
-        return json.load(f)
+    try:
+        with open(os.path.join(CONFIG_DIR, "language-models.json"), "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        logger.warning(
+            "no existing language-models.json found, going with an empty list of models"
+        )
+        return []
 
 
 def update_model_list() -> List[Dict]:
@@ -278,7 +284,7 @@ def update_model_list() -> List[Dict]:
         raise RuntimeError("Fetched empty model list was empty - bailing unhappily")
     logger.info(f"Loaded list of {len(model_list)} models from main server.")
 
-    # preload the existing list of models that are cached locally
+    # preload the existing list of models that are cached locally (will be empty list if first time)
     existing_models = get_model_list()
 
     # update only if the version number has changed, or if the model is new
