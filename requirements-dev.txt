@@ -1,5 +1,5 @@
-pre-commit==3.*
-black==24.*
-commitizen==3.*
+pre-commit==4.*
+black==25.*
+commitizen==4.*
 ruff==0.*
 pytest==8.*
