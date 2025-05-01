@@ -129,10 +129,8 @@ def classify_and_post_worker(self, project: Dict, stories: List[Dict]):
 
         Session = database.get_session_maker()
         with Session() as session:
-            stories_with_confidence = _add_confidence_to_stories(
-                session, project, stories
-            )
-            for s in stories_with_confidence:
+            stories_to_send = _add_confidence_to_stories(session, project, stories)
+            for s in stories_to_send:
                 logger.debug(
                     "  classify: {}/{} - {}".format(
                         project["id"],
@@ -141,14 +139,16 @@ def classify_and_post_worker(self, project: Dict, stories: List[Dict]):
                     )
                 )
             # only stories above project score threshold should be posted
-            stories_above_threshold = projects.remove_low_confidence_stories(
-                project.get("min_confidence", 0), stories_with_confidence
+            stories_to_send = projects.remove_low_confidence_stories(
+                project.get("min_confidence", 0), stories_to_send
             )
+            # remove any duplicates based on title & story (we've seen this with _slightly_ diff URLs)
+            stories_to_send = util.remove_duplicate_by_title_media_id(stories_to_send)
             # pull out entities, if there is an env-var to a server set (only do this on above-threshold stories)
-            stories_with_entities = add_entities_to_stories(stories_above_threshold)
+            stories_to_send = add_entities_to_stories(stories_to_send)
             # remove data we aren't going to send to the server (and log)
             stories_to_send = projects.prep_stories_for_posting(
-                project, stories_with_entities
+                project, stories_to_send
             )
             if (
                 projects.LOG_LAST_POST_TO_FILE

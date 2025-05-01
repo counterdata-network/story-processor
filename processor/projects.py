@@ -166,8 +166,8 @@ def remove_low_confidence_stories(
 
 def prep_stories_for_posting(project: Dict, stories: List[Dict]) -> List[Dict]:
     """
-    Pull out just the info to send to the central feminicide server (we don't want to send it data it shouldn't see, or
-    cannot use).
+    Pull out just the info to send to the central feminicide server (we don't want to send it data it
+    shouldn't see, or cannot use).
     :param project:
     :param stories:
     :return:
