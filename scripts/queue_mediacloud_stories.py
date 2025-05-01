@@ -79,11 +79,6 @@ def _process_project_task(args: Dict) -> Dict:
     indexed_date_query_clause = f"indexed_date:{INCLUSIVE_RANGE_START}{indexed_start.isoformat()} TO {indexed_end.isoformat()}{EXCLUSIVE_RANGE_END}"
     q = f"({project['search_terms']}) AND language:{project['language']} AND {indexed_date_query_clause}"
 
-    # replace the "United States – state and local" collection value if its one of the project's queries
-    if 38379429 in project["media_collections"]:
-        index = project["media_collections"].index(38379429)
-        project["media_collections"][index] = 262985212
-
     # see how many stories
     mc = get_mc_client()
     try:
