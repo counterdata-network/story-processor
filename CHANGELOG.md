@@ -3,6 +3,10 @@ Change Log
 
 Here is a history of what was changed in each version. 
 
+### v4.7.2
+
+* fix to more flexible deduplication so it supports more stories 
+
 ### v4.7.1
 
 * remove stories from same source with same title 
