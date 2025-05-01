@@ -3,6 +3,12 @@ Change Log
 
 Here is a history of what was changed in each version. 
 
+### v4.7.1
+
+* remove stories from same source with same title 
+* remove hack around Media Cloud url_search_str slowness
+* update requirements to latest
+
 ### v4.7.0
 
 * only download language models if they have changed or aren't already downloaded
