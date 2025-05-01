@@ -24,7 +24,10 @@ def remove_duplicate_by_title_media_id(stories: List[Dict]) -> List[Dict]:
     seen = set()  # Set to track unique combinations
     unique_stories = []
     for story in stories:
-        identifier = str(story["media_id"]) + story["title"]
+        media_identifier = (
+            story["media_id"] if "media_id" in story else story["media_name"]
+        )
+        identifier = str(media_identifier) + story["title"]
         # Only add to results if we haven't seen this combination before
         if identifier not in seen:
             seen.add(identifier)
