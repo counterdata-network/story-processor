@@ -15,7 +15,7 @@ import processor
 processor.disable_package_loggers()
 
 import mcmetadata.urls as urls
-from mc_providers.onlinenews import OnlineNewsWaybackMachineProvider
+from waybacknews.searchapi import SearchApiClient
 
 import processor.database as database
 import processor.database.projects_db as projects_db
@@ -68,7 +68,7 @@ def _project_story_worker(p: Dict) -> List[Dict]:
     page_number = 1
     full_project_query = _query_builder(p["search_terms"], p["language"])
     try:
-        wm_provider = OnlineNewsWaybackMachineProvider()
+        wm_provider = SearchApiClient("mediacloud")
         total_hits = wm_provider.count(
             full_project_query, start_date, end_date, domains=p["domains"]
         )
@@ -87,7 +87,7 @@ def _project_story_worker(p: Dict) -> List[Dict]:
                 )
             # using the provider wrapper so this does the chunking into smaller queries for us
             latest_pub_date = dt.datetime.now() - dt.timedelta(weeks=50)
-            for page in wm_provider.all_items(
+            for page in wm_provider.all_articles(
                 full_project_query,
                 start_date,
                 end_date,
@@ -102,7 +102,7 @@ def _project_story_worker(p: Dict) -> List[Dict]:
                 )
                 # track most recent story across all pages (seems to be sorted default by surt_url asc)
                 try:
-                    page_latest_pub_date = max([s["publish_date"] for s in page])
+                    page_latest_pub_date = max([s["publication_date"] for s in page])
                     latest_pub_date = max(latest_pub_date, page_latest_pub_date)
                     # can't track `capture_time` here because it isn't returned in results
                 except Exception:  # maybe no stories on this page?
@@ -116,23 +116,20 @@ def _project_story_worker(p: Dict) -> List[Dict]:
                         skipped_dupes += 1
                         continue
                     info = dict(
-                        id=item[
-                            "id"
-                        ],  # unique ID that can be used to fetch the pre-parsed text from the WM archive
                         # path to pre-parsed content JSON - so we don't have to fetch and parse the HTML ourselves
                         extracted_content_url=item["article_url"],
                         url=item["url"],
                         # the rest of the pipeline expects a str, @see tasks.queue_stories_for_classification
-                        source_publish_date=str(item["publish_date"]),
+                        source_publish_date=str(item["publication_date"]),
                         title=item["title"],
                         source=processor.SOURCE_WAYBACK_MACHINE,
                         project_id=p["id"],
                         language=item["language"],
                         authors=None,
-                        media_url=item["media_url"],
-                        media_name=item["media_name"],  # same as item['media_url']
+                        media_url=item["domain"],
+                        media_name=item["domain"],  # same as item['media_url']
                         archived_url=item[
-                            "archived_url"
+                            "archive_playback_url"
                         ],  # the URL to the Wayback Machine provided HTML copy
                     )
                     project_stories.append(info)
@@ -169,7 +166,7 @@ def fetch_project_stories(project_list: List[Dict]) -> List[Dict]:
     combined_stories = [s for s in itertools.chain.from_iterable(lists_of_stories)]
     logger.info(
         "Fetched {} total URLs from {}".format(
-            len(combined_stories), processor.SOURCE_NEWSCATCHER
+            len(combined_stories), processor.SOURCE_WAYBACK_MACHINE
         )
     )
     return combined_stories
