@@ -15,7 +15,6 @@ import processor
 
 processor.disable_package_loggers()
 
-import mc_providers
 
 import processor.database as database
 import processor.database.projects_db as projects_db
@@ -36,10 +35,6 @@ INCLUSIVE_RANGE_START = "{"
 EXCLUSIVE_RANGE_END = "]"
 
 logger = logging.getLogger(__name__)
-
-MC_PLATFORM_NAME = mc_providers.provider_name(
-    mc_providers.PLATFORM_ONLINE_NEWS, mc_providers.PLATFORM_SOURCE_MEDIA_CLOUD
-)
 
 
 def load_projects_task() -> List[Dict]:
@@ -87,7 +82,6 @@ def _process_project_task(args: Dict) -> Dict:
             pub_start_date,
             pub_end_date,
             collection_ids=project["media_collections"],
-            platform=MC_PLATFORM_NAME,
         )["relevant"]
     except Exception as e:
         logger.error(
@@ -118,7 +112,6 @@ def _process_project_task(args: Dict) -> Dict:
                 pagination_token=page_token,
                 page_size=STORIES_PER_PAGE,
                 sort_order="desc",
-                platform=MC_PLATFORM_NAME,
                 expanded=True,
             )
             logger.info(
