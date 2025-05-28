@@ -3,6 +3,10 @@ Change Log
 
 Here is a history of what was changed in each version. 
 
+### v4.7.3
+
+* refactoring code to remove reliance on internal-only mc-providers library (using public API clients instead for Media Cloud and Wayback Machine)
+
 ### v4.7.2
 
 * fix to more flexible deduplication so it supports more stories 
