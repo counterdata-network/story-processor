@@ -48,9 +48,11 @@ def load_projects() -> List[Dict]:
     return project_list
 
 
-def _query_builder(terms: str, language: str) -> str:
+def _query_builder(terms: str, language: str, domains: List[str]) -> str:
     terms_no_curlies = terms.replace("“", '"').replace("”", '"')
-    return "({}) AND (language:{})".format(terms_no_curlies, language)
+    language_clause = f"language:{language}"
+    domains_clause = "domain:({})".format(" OR ".join(domains))
+    return f"({terms_no_curlies}) AND ({language_clause}) AND ({domains_clause})"
 
 
 def _project_story_worker(p: Dict) -> List[Dict]:
@@ -66,12 +68,10 @@ def _project_story_worker(p: Dict) -> List[Dict]:
     project_stories = []
     skipped_dupes = 0  # how many URLs do we filter out because they're already in the DB for this project recently
     page_number = 1
-    full_project_query = _query_builder(p["search_terms"], p["language"])
+    full_project_query = _query_builder(p["search_terms"], p["language"], p["domains"])
     try:
         wm_provider = SearchApiClient("mediacloud")
-        total_hits = wm_provider.count(
-            full_project_query, start_date, end_date, domains=p["domains"]
-        )
+        total_hits = wm_provider.count(full_project_query, start_date, end_date)
         time.sleep(0.1)  # don't hammer the API
         logger.info(
             "Project {}/{} - {} total stories from {} domains (since {})".format(
