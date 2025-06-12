@@ -23,6 +23,7 @@ import processor.database.stories_db as stories_db
 import processor.fetcher as fetcher
 import processor.mcdirectory as mcdirectory
 import processor.projects as projects
+import scripts.gmmp as gmmp
 import scripts.tasks as tasks
 from processor.classifiers import download_models
 
@@ -45,7 +46,8 @@ def load_projects() -> List[Dict]:
     logger.info("  Found {} projects".format(len(project_list)))
     # return project_list[20:22]
     # return [p for p in project_list if p['id'] == 166]
-    return project_list
+    # return project_list
+    return [p for p in project_list if p["id"] in gmmp.ALLOWED_PROJECT_IDS]
 
 
 def _query_builder(terms: str, language: str, domains: List[str]) -> str:
@@ -58,6 +60,7 @@ def _query_builder(terms: str, language: str, domains: List[str]) -> str:
 def _project_story_worker(p: Dict) -> List[Dict]:
     Session = database.get_session_maker()
     # can't use start_date as `capture_time` filter; ignore last request (results sorted by most recent captures first)
+    """
     start_date, end_date = projects.query_start_end_dates(
         p,
         Session,
@@ -65,6 +68,9 @@ def _project_story_worker(p: Dict) -> List[Dict]:
         DEFAULT_DAY_WINDOW,
         processor.SOURCE_WAYBACK_MACHINE,
     )
+    """
+    start_date = gmmp.START_DATE
+    end_date = gmmp.END_DATE
     project_stories = []
     skipped_dupes = 0  # how many URLs do we filter out because they're already in the DB for this project recently
     page_number = 1

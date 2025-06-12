@@ -23,6 +23,7 @@ import processor.database.projects_db as projects_db
 import processor.database.stories_db as stories_db
 import processor.fetcher as fetcher
 import processor.projects as projects
+import scripts.gmmp as gmmp
 import scripts.newscatcher_api as newscatcher_api
 import scripts.tasks as tasks
 from processor.classifiers import download_models
@@ -63,7 +64,8 @@ def load_projects() -> List[Dict]:
     )
     # return [p for p in projects_with_countries if p['id'] == 166]
     # return projects_with_countries[16:18]
-    return projects_with_countries
+    return [p for p in project_list if p["id"] in gmmp.ALLOWED_PROJECT_IDS]
+    # return projects_with_countries
 
 
 def _fetch_results(
@@ -94,6 +96,7 @@ def _project_story_worker(p: Dict) -> List[Dict]:
     db_session_maker = database.get_session_maker()
     # here start_date ignores last query history, since sort is by relevancy; we're relying on robust URL de-duping
     # to make sure we don't double up on stories (and keeping MAX_STORIES_PER_PROJECT low)
+    """
     start_date, end_date = projects.query_start_end_dates(
         p,
         db_session_maker,
@@ -101,6 +104,9 @@ def _project_story_worker(p: Dict) -> List[Dict]:
         DEFAULT_DAY_WINDOW,
         processor.SOURCE_NEWSCATCHER,
     )
+    """
+    start_date = gmmp.START_DATE
+    end_date = gmmp.END_DATE
     page_number = 1
     # fetch first page to get total hits, and use results
     current_page = _fetch_results(p, start_date, end_date, page_number)

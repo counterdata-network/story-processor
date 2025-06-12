@@ -8,8 +8,6 @@ import sys
 import time
 from typing import Dict, List
 
-import pytz
-
 # Disable loggers prior to package imports
 import processor
 
@@ -21,6 +19,7 @@ import processor.database.projects_db as projects_db
 import processor.database.stories_db as stories_db
 import processor.projects as projects
 import processor.tasks.classification as classification_tasks
+import scripts.gmmp as gmmp
 import scripts.tasks as tasks
 from processor import get_mc_client
 from processor.classifiers import download_models
@@ -42,8 +41,8 @@ def load_projects_task() -> List[Dict]:
         force_reload=True, overwrite_last_story=False
     )
     logger.info("  Checking {} projects".format(len(project_list)))
-    # return [p for p in project_list if p["id"] == 177]
-    return project_list
+    return [p for p in project_list if p["id"] in gmmp.ALLOWED_PROJECT_IDS]
+    # return project_list
 
 
 def _process_project_task(args: Dict) -> Dict:
@@ -57,13 +56,16 @@ def _process_project_task(args: Dict) -> Dict:
         DAY_WINDOW,
         processor.SOURCE_MEDIA_CLOUD,
     )
-    utc = pytz.UTC
+
+    # utc = pytz.UTC
     # indexed_date filter should be from last search until now
-    indexed_start = start_date
-    indexed_end = utc.localize(dt.datetime.now())
+    # indexed_start = start_date
+    # indexed_end = utc.localize(dt.datetime.now())
     # published_date filter should be the day window for recency (this is stored in MC as date, not datetime)
-    pub_start_date = dt.date.today() - dt.timedelta(days=(DAY_OFFSET + DAY_WINDOW))
-    pub_end_date = end_date.date()
+    # pub_start_date = dt.date.today() - dt.timedelta(days=(DAY_OFFSET + DAY_WINDOW))
+    # pub_end_date = end_date.date()
+    pub_start_date = gmmp.START_DATE
+    pub_end_date = gmmp.END_DATE
     project_email_message = ""
     logger.info("Checking project {}/{}".format(project["id"], project["title"]))
     logger.debug("  {} stories/page up to {}".format(page_size, max_stories))
@@ -71,8 +73,8 @@ def _process_project_task(args: Dict) -> Dict:
         project["id"], project["title"]
     )
     # setup queries to filter by language too, so we only get stories the model can process
-    indexed_date_query_clause = f"indexed_date:{INCLUSIVE_RANGE_START}{indexed_start.isoformat()} TO {indexed_end.isoformat()}{EXCLUSIVE_RANGE_END}"
-    q = f"({project['search_terms']}) AND language:{project['language']} AND {indexed_date_query_clause}"
+    # indexed_date_query_clause = f"indexed_date:{INCLUSIVE_RANGE_START}{indexed_start.isoformat()} TO {indexed_end.isoformat()}{EXCLUSIVE_RANGE_END}"
+    q = f"({project['search_terms']}) AND language:{project['language']}"  # AND {indexed_date_query_clause}"
 
     # see how many stories
     mc = get_mc_client()
