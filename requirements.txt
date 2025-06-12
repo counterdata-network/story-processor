@@ -4,9 +4,9 @@ mediacloud==4.3.*
 dateparser==1.2.*
 scikit-learn==1.0.2  # freeze this here for model serialization compatability
 sentry-sdk[flask]==2.27.*
-tensorflow-hub==0.*
-tensorflow-text==2.*
-tensorflow==2.10.*  # freeze here due to cross-platform install challenges
+#tensorflow-hub==0.*
+#tensorflow-text==2.*
+#tensorflow==2.10.*  # freeze here due to cross-platform install challenges
 psycopg2==2.9.*
 SQLAlchemy==2.0.*
 alembic==1.15.*
