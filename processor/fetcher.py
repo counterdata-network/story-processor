@@ -20,7 +20,8 @@ class UrlSpider(scrapy.Spider):
         "AUTOTHROTTLE_ENABLED": True,
         "AUTOTHROTTLE_TARGET_CONCURRENCY": 64,
         "DOWNLOAD_TIMEOUT": 20,
-        "USER_AGENT": "Mozilla/5.0 (compatible; Data Against Feminicide academic research; datoscontrafeminicidio.net)",
+        # "USER_AGENT": "Mozilla/5.0 (compatible; Data Against Feminicide academic research; datoscontrafeminicidio.net)",
+        "USER_AGENT": "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_7_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.4 Safari/605.1.15",
     }
 
     def __init__(
@@ -28,7 +29,7 @@ class UrlSpider(scrapy.Spider):
         handle_parse: Optional[Callable],
         start_urls: List[str],
         *args: List,
-        **kwargs: Dict
+        **kwargs: Dict,
     ) -> None:
         """
         Handle_parse will be called with a story:Dict object

@@ -163,7 +163,9 @@ def classify_and_post_worker(self, project: Dict, stories: List[Dict]):
                     "w",
                     encoding="utf-8",
                 ) as f:
-                    json.dump(stories_to_send, f, ensure_ascii=False, indent=4)
+                    json.dump(
+                        stories_to_send, f, ensure_ascii=False, indent=4, default=str
+                    )
             # mark the stories in the local DB that we intend to send
             stories_db.update_stories_above_threshold(session, stories_to_send)
             # now actually post them (in chunks just to make sure no single page is too big and causes a HTTP 413 error)

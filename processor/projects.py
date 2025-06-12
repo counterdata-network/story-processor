@@ -25,9 +25,9 @@ logger = logging.getLogger(__name__)
 
 _all_projects = None  # acts as a singleton because we only load it once (after we update it from central server)
 
-REALLY_POST = True  # helpful debug flag - set to False and we don't post results to central server TMP
+REALLY_POST = False  # helpful debug flag - set to False and we don't post results to central server TMP
 LOG_LAST_POST_TO_FILE = (
-    False  # helpful for storing traces of JSON sent to mail server locally
+    True  # helpful for storing traces of JSON sent to mail server locally
 )
 
 
