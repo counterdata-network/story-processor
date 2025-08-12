@@ -97,6 +97,20 @@ class TestClassifierResults(unittest.TestCase):
         results = classifier.classify(sample_texts)["model_scores"]
         assert round(results[0], 5) == 0.83309
 
+    def test_classify_sw(self):
+        project = (
+            TEST_EN_PROJECT.copy()
+        )  # important to copy before editing, otherwise subsequent tests get messed up
+        project["language_model_id"] = 19
+        classifier = classifiers.for_project(project)
+        with open(
+            os.path.join(test_fixture_dir, "sw_sample_stories.json"), encoding="utf-8"
+        ) as f:
+            sample_texts = json.load(f)
+        sample_texts = [dict(story_text=t) for t in sample_texts]
+        results = classifier.classify(sample_texts)["model_scores"]
+        assert round(results[0], 5) == 0.19488
+
     def _classify_one_from(self, index, file):
         with open(os.path.join(test_fixture_dir, file), encoding="utf-8") as f:
             sample_texts = json.load(f)
