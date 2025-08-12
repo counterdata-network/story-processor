@@ -72,7 +72,7 @@ def _process_project_task(args: Dict) -> Dict:
     )
     # setup queries to filter by language too, so we only get stories the model can process
     indexed_date_query_clause = f"indexed_date:{INCLUSIVE_RANGE_START}{indexed_start.isoformat()} TO {indexed_end.isoformat()}{EXCLUSIVE_RANGE_END}"
-    q = f"({project['search_terms']}) AND language:{project['language']} AND {indexed_date_query_clause}"
+    q = f"({project['search_terms']}) AND language:{project['language'].lower()} AND {indexed_date_query_clause}"
 
     # see how many stories
     mc = get_mc_client()

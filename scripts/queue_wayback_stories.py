@@ -50,7 +50,7 @@ def load_projects() -> List[Dict]:
 
 def _query_builder(terms: str, language: str, domains: List[str]) -> str:
     terms_no_curlies = terms.replace("“", '"').replace("”", '"')
-    language_clause = f"language:{language}"
+    language_clause = f"language:{language.lower()}"
     domains_clause = "domain:({})".format(" OR ".join(domains))
     return f"({terms_no_curlies}) AND ({language_clause}) AND ({domains_clause})"
 
