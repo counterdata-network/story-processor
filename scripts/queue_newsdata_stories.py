@@ -28,7 +28,6 @@ from processor.classifiers import download_models
 
 POOL_SIZE = 16  # parallel fetch for story URL lists (by project)
 PAGE_SIZE = 100
-RATE_LIMIT = 1
 DAY_OFFSET = 0
 DAY_WINDOW = 2  # don't look for stories that are too old
 MAX_STORIES_PER_PROJECT = (
@@ -37,7 +36,7 @@ MAX_STORIES_PER_PROJECT = (
 MAX_CALLS_PER_SEC = 1  # throttle calls to NewsData to avoid rate limiting
 DELAY_SECS = 1 / MAX_CALLS_PER_SEC  # may need to be further adjusted
 
-# create requests session
+# initialize api client, maybe do this in processor initialization?
 newsdata_api = NewsDataApiClient(apikey=NEWSDATA_API_KEY)
 
 logger = logging.getLogger(__name__)
