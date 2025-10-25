@@ -195,7 +195,7 @@ def process_projects_in_parallel(projects_list: List[Dict], pool_size: int):
     args_list = [(p, STORIES_PER_PAGE, MAX_STORIES_PER_PROJECT) for p in projects_list]
     with multiprocessing.Pool(pool_size) as pool:
         results = pool.map(_process_project_task, args_list)
-    return results[:MAX_STORIES_PER_PROJECT]
+    return results
 
 
 if __name__ == "__main__":
