@@ -2,7 +2,6 @@
 
 import datetime as dt
 import logging
-import multiprocessing
 import sys
 import time
 from typing import Dict, List
@@ -26,13 +25,21 @@ import scripts.tasks as tasks
 from processor import NEWSDATA_API_KEY
 from processor.classifiers import download_models
 
-POOL_SIZE = 16  # parallel fetch for story URL lists (by project)
-PAGE_SIZE = 100
-DAY_OFFSET = 0
-DAY_WINDOW = 2  # don't look for stories that are too old
-MAX_STORIES_PER_PROJECT = (
-    2000  # can't process all the stories for queries that are too big (keep this low)
+MAX_QUERY_LENGTH = 100
+
+DAY_OFFSET = 0  # they claim to have pseudo-relatime data
+DAY_WINDOW = (
+    2  # our max stories is small here, so don't look for stories that are too old
 )
+
+# we have 20,000 credits per month, at 50 articles per credit that's about 30,000 articles/day we can fetch
+# Oct'25 we have about 100 projects, that that's only 300 per project if they are all fully live and populated
+# but they're not so let's try 500 for now
+PAGE_SIZE = 50  # per API spec that is max
+MAX_STORIES_PER_PROJECT = 500  # anyway we can't process all the stories for queries that are too big because we have to fetch full text
+
+# Rate limit is  1800 credits every 15 minute, which is 90,000 articles / 15 minutes. That's more than we can
+# fetch each day given our account level, so we can set a low rate limit here
 MAX_CALLS_PER_SEC = 1  # throttle calls to NewsData to avoid rate limiting
 DELAY_SECS = 1 / MAX_CALLS_PER_SEC  # may need to be further adjusted
 
@@ -52,7 +59,7 @@ def load_projects_task() -> List[Dict]:
     return project_list
 
 
-def _process_project_task(args: Dict) -> Dict:
+def _project_story_worker(args: Dict) -> Dict:
     p = args
     Session = database.get_session_maker()
     # build a time frame to search in
@@ -91,8 +98,10 @@ def _process_project_task(args: Dict) -> Dict:
                 from_date=from_date,
                 to_date=to_date,
                 full_content=True,  # make sure to collect full text
+                country=p["newscatcher_country"],
                 size=PAGE_SIZE,
                 page=page_token,
+                # docs say sort is by "publish date (newest first)" if no sort specified (that's what we want)
             )
             page_of_stories = response["results"]
             total_stories = response["totalResults"]
@@ -196,10 +205,10 @@ def _process_project_task(args: Dict) -> Dict:
     )
 
 
-def process_projects_in_parallel(projects_list: List[Dict], pool_size: int):
-    args_list = [p for p in projects_list]
-    with multiprocessing.Pool(pool_size) as pool:
-        results = pool.map(_process_project_task, args_list)
+def process_projects(project_list: List[Dict]) -> List[Dict]:
+    results = []
+    for p in project_list:
+        results.append(_project_story_worker(p))
     return results
 
 
@@ -216,21 +225,20 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # 1. list all the project we need to work on
-    projects_list = load_projects_task()
+    all_projects_list = load_projects_task()
+    projects_list = [
+        p for p in all_projects_list if len(p["search_terms"]) < MAX_QUERY_LENGTH
+    ]
 
-    # 2. process all the projects (in parallel)
-    logger.info(f"Processing project in parallel {POOL_SIZE}")
-    project_results = process_projects_in_parallel(projects_list, POOL_SIZE)
+    # 2. process all the projects and queue results by project
+    logger.info("Processing project")
+    project_results = process_projects(projects_list)
+    logger.info(f"Total stories queued: {sum([p['stories'] for p in project_results])}")
 
     # 3. send email/slack_msg with results of operations
-    logger.info(f"Total stories queued: {sum([p['stories'] for p in project_results])}")
     tasks.send_project_list_slack_message(
-        project_results,
-        processor.SOURCE_NEWSDATA,
-        start_time,
+        project_results, processor.SOURCE_NEWSDATA, start_time
     )
     tasks.send_project_list_email(
-        project_results,
-        processor.SOURCE_NEWSDATA,
-        start_time,
+        project_results, processor.SOURCE_NEWSDATA, start_time
     )
