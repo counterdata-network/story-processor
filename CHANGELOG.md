@@ -3,6 +3,10 @@ Change Log
 
 Here is a history of what was changed in each version. 
 
+### v4.8.1
+
+* fix production deployment bug with NewsData.io integration
+
 ### v4.8.0
 
 * add support for NewsData.io as an alternate source of candidate stories
