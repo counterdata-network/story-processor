@@ -14,11 +14,13 @@ SOURCE_GOOGLE_ALERTS = "google-alerts"
 SOURCE_MEDIA_CLOUD = "media-cloud"
 SOURCE_NEWSCATCHER = "newscatcher"
 SOURCE_WAYBACK_MACHINE = "wayback-machine"
+SOURCE_NEWSDATA = "newsdata.io"
 PLATFORMS = [
     SOURCE_GOOGLE_ALERTS,
     SOURCE_MEDIA_CLOUD,
     SOURCE_NEWSCATCHER,
     SOURCE_WAYBACK_MACHINE,
+    SOURCE_NEWSDATA,
 ]
 
 load_dotenv()  # load config from .env file (local) or env vars (production)
@@ -135,6 +137,12 @@ NEWSCATCHER_API_KEY = os.environ["NEWSCATCHER_API_KEY"]
 if NEWSCATCHER_API_KEY is None:
     logger.warning(
         "  ⚠️ No NEWSCATCHER_API_KEY is specified. We won't be fetching from Newscatcher."
+    )
+
+NEWSDATA_API_KEY = os.environ.get("NEWSDATA_API_KEY", None)
+if NEWSDATA_API_KEY is None:
+    logger.warning(
+        "  ⚠️ No NEWSDATA_API_KEY is specified. We won't be fetching from NewsData.io."
     )
 
 SLACK_APP_TOKEN = os.environ.get("SLACK_APP_TOKEN", None)

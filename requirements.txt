@@ -22,3 +22,4 @@ requests_ratelimiter==0.7.*
 redis==6.0.*
 wayback-news-search==1.2.*
 kombu
+newsdataapi==0.1.*
