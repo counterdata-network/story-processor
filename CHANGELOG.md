@@ -3,6 +3,12 @@ Change Log
 
 Here is a history of what was changed in each version. 
 
+### v4.8.0
+
+* add support for NewsData.io as an alternate source of candidate stories
+* fix python version specification file
+* force lowercase on langauge in queries
+
 ### v4.7.4
 
 * fix bug that wasn't respecting domains on wayback-machine source
