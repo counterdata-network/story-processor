@@ -58,7 +58,7 @@ def search_stories(
     """
     params = {
         "q": q,
-        "lang": language,
+        "lang": language.lower(),
         "countries": countries,
         "page_size": page_size,
         "from_": start_date.strftime("%Y-%m-%d"),
