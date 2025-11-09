@@ -3,6 +3,10 @@ Change Log
 
 Here is a history of what was changed in each version. 
 
+### v4.8.2
+
+* adjust rate limit on NewsData calls
+
 ### v4.8.1
 
 * fix production deployment bug with NewsData.io integration
