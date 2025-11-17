@@ -297,25 +297,34 @@ def update_model_list() -> List[Dict]:
             updated_models.append(model)
 
     # before returning, make sure that the model files that we've assumed exist, actually exist
-    for model in [m for m in model_list if m not in updated_models]:
-        # get extra safe .p name
-        for u in model["model_1_files"]:
-            model_file1 = _model_file_path(
-                u, MODEL_DIR, model["filename_prefix"] + "_1"
-            )
-            # if model 1 files don't exist, add the model to be updated, and skip the check for model 2 files
-            if not os.path.isfile(model_file1):
-                updated_models.append(model)
-                break
-        else:
-            for u in model["model_2_files"]:
-                # get extra safe .p name and check that it exists
-                model_file2 = _model_file_path(
-                    u, MODEL_DIR, model["filename_prefix"] + "_2"
+    non_updated_models = [m for m in model_list if m not in updated_models]
+    for model in non_updated_models:
+        try:
+            # get extra safe .p name
+            for u in model["model_1_files"]:
+                model_file1 = _model_file_path(
+                    u, MODEL_DIR, model["filename_prefix"] + "_1"
                 )
-                if not os.path.isfile(model_file2):
+                # if model 1 files don't exist, add the model to be updated, and skip the check for model 2 files
+                if not os.path.isfile(model_file1):
                     updated_models.append(model)
                     break
+            else:
+                for u in model["model_2_files"]:
+                    # get extra safe .p name and check that it exists
+                    model_file2 = _model_file_path(
+                        u, MODEL_DIR, model["filename_prefix"] + "_2"
+                    )
+                    if not os.path.isfile(model_file2):
+                        updated_models.append(model)
+                        break
+        except Exception as e:
+            logger.error(
+                f"Couldn't parse model id {model['id']} / {model['name']}: {e}"
+            )
+            # don't append it to the updated_models list, since something didn't work in the metadata
+            # also need to remove this model from the model_list, since we can't use it
+            model_list = [m for m in model_list if m["id"] != model["id"]]
 
     # save new model information and send updated model list for download
     with open(os.path.join(CONFIG_DIR, "language-models.json"), "w") as f:
