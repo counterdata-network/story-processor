@@ -3,9 +3,13 @@ Change Log
 
 Here is a history of what was changed in each version. 
 
+### v4.8.3
+
+* better handling of under-construction models with missing data
+
 ### v4.8.2
 
-* adjust rate limit on NewsData calls
+* adjust rate limit on NewsData calls`
 
 ### v4.8.1
 
