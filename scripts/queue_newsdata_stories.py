@@ -170,7 +170,7 @@ def _project_story_worker(args: Dict) -> Dict:
             else:
                 more_stories = False
         except Exception as e:
-            logger.error(
+            logger.exception(
                 "  Couldn't count/retrieve stories in project {}. Skipping project for now. {}".format(
                     p["id"], e
                 )
