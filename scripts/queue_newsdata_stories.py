@@ -126,7 +126,9 @@ def _project_story_worker(args: Dict) -> Dict:
                     dateparser.parse(s["pubDate"]) for s in page_of_stories
                 ]
                 latest_pub_date = max(latest_pub_date, max(page_latest_pub_date))
-
+                cleaned_page_of_stories = (
+                    []
+                )  # make sure we respect max stories per project by using this from now on
                 for s in page_of_stories:
                     if story_count >= MAX_STORIES_PER_PROJECT:
                         break
@@ -147,11 +149,12 @@ def _project_story_worker(args: Dict) -> Dict:
                     s["media_name"] = s["source_name"]
                     s["media_id"] = s["source_id"]
                     s["media_url"] = s["source_url"]
+                    cleaned_page_of_stories.append(s)
                 page_count += 1
                 # and log that we got and queued them all
                 with Session() as session:
                     stories_to_queue = stories_db.add_stories(
-                        session, page_of_stories, p, processor.SOURCE_NEWSDATA
+                        session, cleaned_page_of_stories, p, processor.SOURCE_NEWSDATA
                     )
                     story_count += len(stories_to_queue)
                     classification_tasks.classify_and_post_worker.delay(

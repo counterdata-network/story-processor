@@ -6,7 +6,8 @@ Here is a history of what was changed in each version.
 ### v4.8.4
 
 * update some requirements to latest
-* handle errors while fetching Newscatcher data better
+* handle errors while fetching Newscatcher and Newsdata.io data better
+* fix bug in Newsdata related to duplicate stories
 
 ### v4.8.3
 
