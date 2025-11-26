@@ -91,92 +91,102 @@ def _fetch_results(
 
 
 def _project_story_worker(p: Dict) -> List[Dict]:
-    db_session_maker = database.get_session_maker()
-    # here start_date ignores last query history, since sort is by relevancy; we're relying on robust URL de-duping
-    # to make sure we don't double up on stories (and keeping MAX_STORIES_PER_PROJECT low)
-    start_date, end_date = projects.query_start_end_dates(
-        p,
-        db_session_maker,
-        DEFAULT_DAY_OFFSET,
-        DEFAULT_DAY_WINDOW,
-        processor.SOURCE_NEWSCATCHER,
-    )
-    page_number = 1
-    # fetch first page to get total hits, and use results
-    current_page = _fetch_results(p, start_date, end_date, page_number)
-    total_hits = current_page["total_hits"]
-    logger.info(
-        "Project {}/{} - {} total stories (since {})".format(
-            p["id"], p["title"], total_hits, start_date
-        )
-    )
     project_stories = []
-    skipped_dupes = 0  # how many URLs do we filter out because they're already in the DB for this project recently
-    if total_hits > 0:
-        # list recent urls to filter so we don't fetch text extra if we've recently proceses already
-        # (and will be filtered out by add_stories call in later post-text-fetch step)
-        with db_session_maker() as db_session:
-            already_processed_normalized_urls = (
-                stories_db.project_story_normalized_urls(db_session, p, 14)
-            )
-        # query page by page
-        latest_pub_date = dt.datetime.now() - dt.timedelta(weeks=50)
-        page_count = math.ceil(total_hits / PAGE_SIZE)
-        keep_going = True
-        while keep_going:
-            logger.debug(
-                "  {} - page {}: {} stories".format(
-                    p["id"], page_number, len(current_page["articles"])
-                )
-            )
-            # track the latest date so we can use it tomorrow
-            page_latest_pub_date = [
-                dateparser.parse(s["published_date"]) for s in current_page["articles"]
-            ]
-            latest_pub_date = max(latest_pub_date, max(page_latest_pub_date))
-            # prep all the articles
-            for item in current_page["articles"]:
-                if len(project_stories) > MAX_STORIES_PER_PROJECT:
-                    break
-                real_url = item["link"]
-                # skip URLs we've processed recently
-                if urls.normalize_url(real_url) in already_processed_normalized_urls:
-                    skipped_dupes += 1
-                    continue
-                # removing this check for now, because I'm not sure if stories are ordered consistently
-                info = dict(
-                    url=real_url,
-                    source_publish_date=item["published_date"],
-                    title=item["title"],
-                    source=processor.SOURCE_NEWSCATCHER,
-                    project_id=p["id"],
-                    language=p["language"],
-                    authors=item["authors"],
-                    media_url=urls.canonical_domain(real_url),
-                    media_name=urls.canonical_domain(real_url),
-                    # too bad there isn't somewhere we can store the `id` (string)
-                )
-                project_stories.append(info)
-            if keep_going:  # check after page is processed
-                keep_going = (page_number < page_count) and (
-                    len(project_stories) <= MAX_STORIES_PER_PROJECT
-                )
-                if keep_going:
-                    page_number += 1
-                    time.sleep(DELAY_SECS)
-                    current_page = _fetch_results(p, start_date, end_date, page_number)
-                    # stay below rate limiting
+    try:
+        db_session_maker = database.get_session_maker()
+        # here start_date ignores last query history, since sort is by relevancy; we're relying on robust URL de-duping
+        # to make sure we don't double up on stories (and keeping MAX_STORIES_PER_PROJECT low)
+        start_date, end_date = projects.query_start_end_dates(
+            p,
+            db_session_maker,
+            DEFAULT_DAY_OFFSET,
+            DEFAULT_DAY_WINDOW,
+            processor.SOURCE_NEWSCATCHER,
+        )
+        page_number = 1
+        # fetch first page to get total hits, and use results
+        current_page = _fetch_results(p, start_date, end_date, page_number)
+        total_hits = current_page["total_hits"]
         logger.info(
-            "  project {} - {} valid stories (skipped {}) (after {})".format(
-                p["id"], len(project_stories), skipped_dupes, start_date
+            "Project {}/{} - {} total stories (since {})".format(
+                p["id"], p["title"], total_hits, start_date
             )
         )
-        with db_session_maker() as db_session:
-            # note - right now this latest pub date isn't used, because the sort is by relevancy within the
-            # default time window
-            projects_db.update_history(
-                db_session, p["id"], latest_pub_date, processor.SOURCE_NEWSCATCHER
+        skipped_dupes = 0  # how many URLs do we filter out because they're already in the DB for this project recently
+        if total_hits > 0:
+            # list recent urls to filter so we don't fetch text extra if we've recently proceses already
+            # (and will be filtered out by add_stories call in later post-text-fetch step)
+            with db_session_maker() as db_session:
+                already_processed_normalized_urls = (
+                    stories_db.project_story_normalized_urls(db_session, p, 14)
+                )
+            # query page by page
+            latest_pub_date = dt.datetime.now() - dt.timedelta(weeks=50)
+            page_count = math.ceil(total_hits / PAGE_SIZE)
+            keep_going = True
+            while keep_going:
+                logger.debug(
+                    "  {} - page {}: {} stories".format(
+                        p["id"], page_number, len(current_page["articles"])
+                    )
+                )
+                # track the latest date so we can use it tomorrow
+                page_latest_pub_date = [
+                    dateparser.parse(s["published_date"])
+                    for s in current_page["articles"]
+                ]
+                latest_pub_date = max(latest_pub_date, max(page_latest_pub_date))
+                # prep all the articles
+                for item in current_page["articles"]:
+                    if len(project_stories) > MAX_STORIES_PER_PROJECT:
+                        break
+                    real_url = item["link"]
+                    # skip URLs we've processed recently
+                    if (
+                        urls.normalize_url(real_url)
+                        in already_processed_normalized_urls
+                    ):
+                        skipped_dupes += 1
+                        continue
+                    # removing this check for now, because I'm not sure if stories are ordered consistently
+                    info = dict(
+                        url=real_url,
+                        source_publish_date=item["published_date"],
+                        title=item["title"],
+                        source=processor.SOURCE_NEWSCATCHER,
+                        project_id=p["id"],
+                        language=p["language"],
+                        authors=item["authors"],
+                        media_url=urls.canonical_domain(real_url),
+                        media_name=urls.canonical_domain(real_url),
+                        # too bad there isn't somewhere we can store the `id` (string)
+                    )
+                    project_stories.append(info)
+                if keep_going:  # check after page is processed
+                    keep_going = (page_number < page_count) and (
+                        len(project_stories) <= MAX_STORIES_PER_PROJECT
+                    )
+                    if keep_going:
+                        page_number += 1
+                        time.sleep(DELAY_SECS)
+                        current_page = _fetch_results(
+                            p, start_date, end_date, page_number
+                        )
+                        # stay below rate limiting
+            logger.info(
+                "  project {} - {} valid stories (skipped {}) (after {})".format(
+                    p["id"], len(project_stories), skipped_dupes, start_date
+                )
             )
+            with db_session_maker() as db_session:
+                # note - right now this latest pub date isn't used, because the sort is by relevancy within the
+                # default time window
+                projects_db.update_history(
+                    db_session, p["id"], latest_pub_date, processor.SOURCE_NEWSCATCHER
+                )
+    except Exception as e:
+        # log error and continue on your way
+        logger.exception(f"Failed to process stories for project {p['id']}: {e}")
     return project_stories[:MAX_STORIES_PER_PROJECT]
 
 
