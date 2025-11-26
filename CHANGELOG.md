@@ -3,6 +3,11 @@ Change Log
 
 Here is a history of what was changed in each version. 
 
+### v4.8.4
+
+* update some requirements to latest
+* handle errors while fetching Newscatcher data better
+
 ### v4.8.3
 
 * better handling of under-construction models with missing data
