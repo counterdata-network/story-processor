@@ -28,7 +28,7 @@ class UrlSpider(scrapy.Spider):
         handle_parse: Optional[Callable],
         start_urls: List[str],
         *args: List,
-        **kwargs: Dict
+        **kwargs: Dict,
     ) -> None:
         """
         Handle_parse will be called with a story:Dict object
@@ -58,13 +58,6 @@ class UrlSpider(scrapy.Spider):
         return None
 
 
-def run_spider(handle_parse: Callable, urls: List[str]) -> defer.Deferred:
-    """Runs a spider for a batch of URLs and returns a deferred object:"""
-    runner = crawler.CrawlerRunner()
-    deferred = runner.crawl(UrlSpider, handle_parse=handle_parse, start_urls=urls)
-    return deferred
-
-
 def group_urls_by_domain(urls: List[str]) -> List[List[str]]:
     """
     Groups URLs by their domain. Skips URLs that do not have extractable domains.
@@ -82,20 +75,21 @@ def group_urls_by_domain(urls: List[str]) -> List[List[str]]:
 def fetch_all_html(
     urls: List[str], handle_parse: Callable, num_spiders: int = 4
 ) -> None:
-    """Splits URLs into batches and manages the concurrent execution of multiple spiders"""
     if not urls:
         return
 
-    # group URLs by domain
     domain_list = group_urls_by_domain(urls)
-
-    # distribute domain groups across spiders
     batches = [[] for _ in range(num_spiders)]
     for i, domain_urls in enumerate(domain_list):
         batches[i % num_spiders].extend(domain_urls)
 
-    # run spiders on the batches
-    deferreds = [run_spider(handle_parse, batch) for batch in batches if batch]
+    # Single runner for ALL spiders
+    runner = crawler.CrawlerRunner()
+    deferreds = [
+        runner.crawl(UrlSpider, handle_parse=handle_parse, start_urls=batch)
+        for batch in batches
+        if batch
+    ]
 
     dl = defer.DeferredList(deferreds)
     dl.addBoth(lambda _: reactor.stop())
