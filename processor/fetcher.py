@@ -5,7 +5,11 @@ from urllib.parse import urlparse
 
 import scrapy
 import scrapy.crawler as crawler
+from scrapy.http import Response
 from twisted.internet import defer, reactor
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 class UrlSpider(scrapy.Spider):
@@ -32,18 +36,24 @@ class UrlSpider(scrapy.Spider):
     ) -> None:
         """
         Handle_parse will be called with a story:Dict object
-        :param handle_parse:
-        :param start_urls:
-        :param args:
-        :param kwargs:
+        :param handle_parse: called with story_data dict of "content", "final_url", "original_url" keys for each story
+        :param start_urls: lst of URLs to fetch
+        :param args: passed to parent constructor
+        :param kwargs: passed to parent constructor
         """
         super().__init__(*args, **kwargs)
         self.on_parse = handle_parse
         self.start_urls = start_urls
-        logging.getLogger("scrapy").setLevel(logging.INFO)
-        logging.getLogger("scrapy.core.engine").setLevel(logging.INFO)
+        logging.getLogger("scrapy").setLevel(logging.DEBUG)
+        logging.getLogger("scrapy.core.engine").setLevel(logging.DEBUG)
 
-    def parse(self, response):
+    def start_requests(self):
+        logger.info(f"Spider {self.name} starting with {len(self.start_urls)} URLs")
+        for url in self.start_urls:
+            yield scrapy.Request(url, callback=self.parse)
+        logger.info(f"Spider {self.name} queued all requests")
+
+    def parse(self, response: Response, **kwargs: Any) -> Any:
         # grab the original, undirected URL so we can relink later
         orig_url = (
             response.request.meta["redirect_urls"][0]
