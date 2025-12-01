@@ -222,6 +222,7 @@ def fetch_text(stories: List[Dict]) -> List[Dict]:
     def handle_parse(response_data: Dict):
         # called for each story that successfully is fetched by Scrapy
         nonlocal stories, stories_to_return
+        # note that the url might be from multiple stories, so we need to process it for all of them
         matching_input_stories = [
             s for s in stories if s["url"] == response_data["original_url"]
         ]
@@ -229,16 +230,17 @@ def fetch_text(stories: List[Dict]) -> List[Dict]:
             s
         ) in (
             matching_input_stories
-        ):  # find all matches, which could be from different projects
+        ):  # find all matches, which could be with different URLs from different projects
             story_metadata = metadata.extract(s["url"], response_data["content"])
             s["story_text"] = story_metadata["text_content"]
             s["publish_date"] = story_metadata[
                 "publication_date"
             ]  # this is a date object
+            logger.debug(f"Handled URL: {s['url']}")
             stories_to_return.append(s)
 
     # download them all in parallel... will take a while (make it only unique URLs first)
-    fetcher.fetch_all_html(list(set([s["url"] for s in stories])), handle_parse)
+    fetcher.fetch_all_html(list(set([s["url"] for s in stories])), handle_parse, 1)
     logger.info(
         "Fetched text for {} stories (failed on {})".format(
             len(stories_to_return), len(stories) - len(stories_to_return)
@@ -266,7 +268,7 @@ if __name__ == "__main__":
     all_stories = fetch_project_stories(projects_list)
     unique_url_count = len(set([s["url"] for s in all_stories]))
     logger.info(
-        "Discovered {} total stories, {} unique URLs".format(
+        "Found {} total stories, {} unique URLs".format(
             len(all_stories), unique_url_count
         )
     )
