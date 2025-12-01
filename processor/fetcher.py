@@ -6,7 +6,8 @@ from urllib.parse import urlparse
 import scrapy
 import scrapy.crawler as crawler
 from scrapy.http import Response
-from twisted.internet import defer, reactor
+from scrapy.utils.reactor import install_reactor
+from twisted.internet import defer
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -100,6 +101,11 @@ def fetch_all_html(
     )
 
     # Single runner for ALL spiders
+    logging.info("Install reactor...")
+    install_reactor("twisted.internet.asyncioreactor.AsyncioSelectorReactor")
+    logging.info("Reactor installed")
+    from twisted.internet import reactor  # call after install
+
     logging.info("Creating CrawlerRunner...")
     runner = crawler.CrawlerRunner()
     logging.info("CrawlerRunner created")
