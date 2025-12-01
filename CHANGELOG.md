@@ -3,6 +3,11 @@ Change Log
 
 Here is a history of what was changed in each version. 
 
+### v4.8.6
+
+* changes to support embeddings models, which have broken underlying dependencies
+* update some unit tests to support debugging
+
 ### v4.8.5
 
 * update some requirements to latest
