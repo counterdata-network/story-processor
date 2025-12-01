@@ -3,6 +3,11 @@ Change Log
 
 Here is a history of what was changed in each version. 
 
+### v4.8.5
+
+* update some requirements to latest
+* fix bug in Scrapy fetcher that was stopping downloads for Newscatcher and Wayback Machine
+
 ### v4.8.4
 
 * update some requirements to latest
