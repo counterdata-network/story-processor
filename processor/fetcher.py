@@ -88,19 +88,36 @@ def fetch_all_html(
     if not urls:
         return
 
+    logging.info("=== fetch_all_html START ===")
+    logging.info(f"Processing {len(urls)} URLs")
     domain_list = group_urls_by_domain(urls)
     batches = [[] for _ in range(num_spiders)]
     for i, domain_urls in enumerate(domain_list):
         batches[i % num_spiders].extend(domain_urls)
 
+    logging.info(
+        f"Created {len(batches)} batches, first batch has {len(batches[0])} URLs"
+    )
+
     # Single runner for ALL spiders
+    logging.info("Creating CrawlerRunner...")
     runner = crawler.CrawlerRunner()
+    logging.info("CrawlerRunner created")
+
+    logging.info("About to call runner.crawl()...")
     deferreds = [
         runner.crawl(UrlSpider, handle_parse=handle_parse, start_urls=batch)
         for batch in batches
         if batch
     ]
+    logging.info(f"runner.crawl() returned, created {len(deferreds)} deferreds")
 
     dl = defer.DeferredList(deferreds)
+    logging.info("DeferredList created")
+
     dl.addBoth(lambda _: reactor.stop())
+    logging.info("Added stop callback")
+
+    logging.info("About to call reactor.run()")
     reactor.run()
+    logging.info("=== reactor.run() completed ===")

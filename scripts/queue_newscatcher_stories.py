@@ -62,8 +62,8 @@ def load_projects() -> List[Dict]:
         )
     )
     # return [p for p in projects_with_countries if p['id'] == 166]
-    # return projects_with_countries[16:18]
-    return projects_with_countries
+    return projects_with_countries[16:20]
+    # return projects_with_countries
 
 
 def _fetch_results(
