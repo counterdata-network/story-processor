@@ -33,7 +33,7 @@ RATE_LIMIT = 1
 DEFAULT_DAY_OFFSET = 0
 DEFAULT_DAY_WINDOW = 4  # don't look for stories that are too old
 MAX_STORIES_PER_PROJECT = (
-    100  # can't process all the stories for queries that are too big (keep this low)
+    1000  # can't process all the stories for queries that are too big (keep this low)
 )
 MAX_CALLS_PER_SEC = 1  # throttle calls to newscatcher to avoid rate limiting
 DELAY_SECS = 1 / MAX_CALLS_PER_SEC
@@ -62,8 +62,8 @@ def load_projects() -> List[Dict]:
         )
     )
     # return [p for p in projects_with_countries if p['id'] == 166]
-    return projects_with_countries[16:20]
-    # return projects_with_countries
+    # return projects_with_countries[16:20]
+    return projects_with_countries
 
 
 def _fetch_results(
@@ -236,11 +236,11 @@ def fetch_text(stories: List[Dict]) -> List[Dict]:
             s["publish_date"] = story_metadata[
                 "publication_date"
             ]  # this is a date object
-            logger.debug(f"Handled URL: {s['url']}")
+            # logger.debug(f"Handled URL: {s['url']}")
             stories_to_return.append(s)
 
     # download them all in parallel... will take a while (make it only unique URLs first)
-    fetcher.fetch_all_html(list(set([s["url"] for s in stories])), handle_parse, 1)
+    fetcher.fetch_all_html(list(set([s["url"] for s in stories])), handle_parse)
     logger.info(
         "Fetched text for {} stories (failed on {})".format(
             len(stories_to_return), len(stories) - len(stories_to_return)

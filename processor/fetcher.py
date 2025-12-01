@@ -48,12 +48,6 @@ class UrlSpider(scrapy.Spider):
         logging.getLogger("scrapy").setLevel(logging.DEBUG)
         logging.getLogger("scrapy.core.engine").setLevel(logging.DEBUG)
 
-    def start_requests(self):
-        logger.info(f"Spider {self.name} starting with {len(self.start_urls)} URLs")
-        for url in self.start_urls:
-            yield scrapy.Request(url, callback=self.parse)
-        logger.info(f"Spider {self.name} queued all requests")
-
     def parse(self, response: Response, **kwargs: Any) -> Any:
         # grab the original, undirected URL so we can relink later
         orig_url = (
@@ -89,41 +83,41 @@ def fetch_all_html(
     if not urls:
         return
 
-    logging.info("=== fetch_all_html START ===")
-    logging.info(f"Processing {len(urls)} URLs")
+    # logging.info("=== fetch_all_html START ===")
+    # logging.info(f"Processing {len(urls)} URLs")
     domain_list = group_urls_by_domain(urls)
     batches = [[] for _ in range(num_spiders)]
     for i, domain_urls in enumerate(domain_list):
         batches[i % num_spiders].extend(domain_urls)
 
-    logging.info(
+    logging.debug(
         f"Created {len(batches)} batches, first batch has {len(batches[0])} URLs"
     )
 
     # Single runner for ALL spiders
-    logging.info("Install reactor...")
+    # logging.info("Install reactor...")
     install_reactor("twisted.internet.asyncioreactor.AsyncioSelectorReactor")
-    logging.info("Reactor installed")
+    # logging.info("Reactor installed")
     from twisted.internet import reactor  # call after install
 
-    logging.info("Creating CrawlerRunner...")
+    # logging.info("Creating CrawlerRunner...")
     runner = crawler.CrawlerRunner()
-    logging.info("CrawlerRunner created")
+    # logging.info("CrawlerRunner created")
 
-    logging.info("About to call runner.crawl()...")
+    # logging.info("About to call runner.crawl()...")
     deferreds = [
         runner.crawl(UrlSpider, handle_parse=handle_parse, start_urls=batch)
         for batch in batches
         if batch
     ]
-    logging.info(f"runner.crawl() returned, created {len(deferreds)} deferreds")
+    # logging.info(f"runner.crawl() returned, created {len(deferreds)} deferreds")
 
     dl = defer.DeferredList(deferreds)
-    logging.info("DeferredList created")
+    # logging.info("DeferredList created")
 
     dl.addBoth(lambda _: reactor.stop())
-    logging.info("Added stop callback")
+    # logging.info("Added stop callback")
 
-    logging.info("About to call reactor.run()")
+    # logging.info("About to call reactor.run()")
     reactor.run()
-    logging.info("=== reactor.run() completed ===")
+    # logging.info("=== reactor.run() completed ===")
