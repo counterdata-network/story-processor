@@ -3,6 +3,10 @@ Change Log
 
 Here is a history of what was changed in each version. 
 
+### v4.8.7
+
+* use tfhub to download underlying embeddings models
+
 ### v4.8.6
 
 * changes to support embeddings models, which have broken underlying dependencies
