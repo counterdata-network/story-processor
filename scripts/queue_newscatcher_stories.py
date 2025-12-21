@@ -33,7 +33,7 @@ RATE_LIMIT = 1
 DEFAULT_DAY_OFFSET = 0
 DEFAULT_DAY_WINDOW = 4  # don't look for stories that are too old
 MAX_STORIES_PER_PROJECT = (
-    1000  # can't process all the stories for queries that are too big (keep this low)
+    500  # can't process all the stories for queries that are too big (keep this low)
 )
 MAX_CALLS_PER_SEC = 1  # throttle calls to newscatcher to avoid rate limiting
 DELAY_SECS = 1 / MAX_CALLS_PER_SEC
