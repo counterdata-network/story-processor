@@ -3,6 +3,10 @@ Change Log
 
 Here is a history of what was changed in each version. 
 
+### v4.8.8
+
+* tweak Newscatcher fetch rate to stay under api quota
+
 ### v4.8.7
 
 * use tfhub to download underlying embeddings models
